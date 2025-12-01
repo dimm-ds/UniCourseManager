@@ -24,10 +24,7 @@ class CourseSerializer(serializers.ModelSerializer):
         ]
 
 
-class UniversityCourseSerializer(serializers.ModelSerializer):
-    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-    university = serializers.PrimaryKeyRelatedField(queryset=University.objects.all())
-
+class BaseUniversityCourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = UniversityCourse
         read_only_fields = ["id"]
@@ -40,7 +37,17 @@ class UniversityCourseSerializer(serializers.ModelSerializer):
         ]
 
 
-class UniversityCourseDetailSerializer(serializers.ModelSerializer):
+class FullUniversityCourseSerializer(BaseUniversityCourseSerializer):
+    course = CourseSerializer(read_only=True)
+    university = UniversitySerializer(read_only=True)
+
+
+class MeanUniversityCourseSerializer(serializers.Serializer):
+    total_courses = serializers.IntegerField()
+    average_duration = serializers.FloatField()
+
+
+class DetailUniversityCourseSerializer(serializers.ModelSerializer):
     title = serializers.CharField(source='course.title', read_only=True)
     description = serializers.CharField(source='course.description', read_only=True)
 
@@ -54,24 +61,3 @@ class UniversityCourseDetailSerializer(serializers.ModelSerializer):
             "semester",
             "duration_weeks"
         ]
-
-
-class FullUniversityCourseSerializer(serializers.ModelSerializer):
-    course = CourseSerializer(read_only=True)
-    university = UniversitySerializer(read_only=True)
-
-    class Meta:
-        model = UniversityCourse
-        read_only_fields = ["id"]
-        fields = [
-            "id",
-            "university",
-            "course",
-            "semester",
-            "duration_weeks"
-        ]
-
-
-class UniversityCourseMeanSerializer(serializers.Serializer):
-    total_courses = serializers.IntegerField()
-    average_duration = serializers.FloatField()

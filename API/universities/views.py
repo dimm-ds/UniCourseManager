@@ -5,19 +5,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Avg
 from .models import University, Course, UniversityCourse
-from .serializers import UniversitySerializer, CourseSerializer, UniversityCourseSerializer,\
-    UniversityCourseDetailSerializer, FullUniversityCourseSerializer, UniversityCourseMeanSerializer
+from . import serializers
 
 
 class UniversityViewSet(ModelViewSet):
     queryset = University.objects.all()
-    serializer_class = UniversitySerializer
+    serializer_class = serializers.UniversitySerializer
 
     @action(detail=True, methods=['get'], url_path='courses')
     def get_courses(self, request, pk=None):
         university = self.get_object()
         courses = UniversityCourse.objects.filter(university=university)
-        serializer = UniversityCourseDetailSerializer(courses, many=True)
+        serializer = serializers.DetailUniversityCourseSerializer(courses, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='course_stats')
@@ -34,13 +33,13 @@ class UniversityViewSet(ModelViewSet):
             'average_duration': round(average_duration, 2)
         }
 
-        serializer = UniversityCourseMeanSerializer(data)
+        serializer = serializers.MeanUniversityCourseSerializer(data)
         return Response(serializer.data)
 
 
 class CourseViewSet(ModelViewSet):
     queryset = Course.objects.all()
-    serializer_class = CourseSerializer
+    serializer_class = serializers.CourseSerializer
 
 
 class UniversityCourseViewSet(ModelViewSet):
@@ -56,7 +55,7 @@ class UniversityCourseViewSet(ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method in ["POST", "PATCH", "PUT"]:
-            return UniversityCourseSerializer
-        return FullUniversityCourseSerializer
+            return serializers.BaseUniversityCourseSerializer
+        return serializers.FullUniversityCourseSerializer
 
 
